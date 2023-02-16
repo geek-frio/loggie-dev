@@ -17,10 +17,11 @@ loggie:
       normalize: ~
 
   discovery:
-    enabled: false
+    enabled: true
     kubernetes:
       containerRuntime: containerd
-      kubeconfig: ~/.kube/config
+      rootFsCollectionEnabled: false
+      kubeconfig: /home/frio/.kube/config
       typePodFields:
         namespace: "${_k8s.pod.namespace}"
         podname: "${_k8s.pod.name}"
