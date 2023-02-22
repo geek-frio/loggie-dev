@@ -254,6 +254,9 @@ func (mp *MultiProcessor) run() {
 		case e := <-mp.eventChan:
 			state := getState(e)
 			watchUid := state.WatchUid()
+
+			// 每一个Source:Job 都会对应一个MultiHolder,用于buffer event,来确定
+			// event之间的联系
 			if mh, ok := mp.holderMap[watchUid]; ok {
 				mh.lastHeader = e.Header()
 				mh.append(e)

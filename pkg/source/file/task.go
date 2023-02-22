@@ -47,6 +47,7 @@ type WatchTask struct {
 	sourceName   string
 	config       CollectConfig
 	// 存放读取的file内容?
+	// 虽然一个WatchTask对应多个Job,但是看起来对应一个eventPool?
 	eventPool   *event.Pool
 	productFunc api.ProductFunc
 	activeChan  chan *Job

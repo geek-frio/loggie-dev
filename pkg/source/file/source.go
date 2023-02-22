@@ -180,6 +180,11 @@ func (s *Source) Product() api.Event {
 	return <-s.out
 }
 
+// ProductLoop
+// productFunc闭包已经包含了InterceptorProcessor chain
+//  1. Wrap 包装product function(除了ProcessorChain之外的处理逻辑）
+//  2. 如果为Multi enabled,则生成对应的MutiTask, 放入task chain
+//     变更productFunc为将收到的event发送到 MultiProcessor的eventChan
 func (s *Source) ProductLoop(productFunc api.ProductFunc) {
 	log.Info("%s start product loop", s.String())
 	s.productFunc = productFunc

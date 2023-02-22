@@ -52,6 +52,8 @@ type State struct {
 	jobFields map[string]interface{}
 }
 
+// WatchUid
+// pipelineName:sourceName:jobUid
 func (s *State) WatchUid() string {
 	return s.watchUid
 }
