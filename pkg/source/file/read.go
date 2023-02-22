@@ -119,6 +119,8 @@ func (r *Reader) Start() {
 	})
 }
 
+// work
+// 有多个worker在执行, index 作为Worker的下标
 func (r *Reader) work(index int) {
 	r.countDown.Add(1)
 	log.Info("read worker-%d start", index)
@@ -127,6 +129,8 @@ func (r *Reader) work(index int) {
 		r.countDown.Done()
 	}()
 	readBufferSize := r.config.ReadBufferSize
+	// 当一行的数据的长度超过readBuffer的时候,数据会暂存在backlogBuffer之中
+	//   readBuffer会重新从文件中拉取对应的readBuffer长度的数据,试图找到LineEnd分割符
 	backlogBuffer := make([]byte, 0, readBufferSize)
 	readBuffer := make([]byte, readBufferSize)
 	jobs := r.jobChan
@@ -135,6 +139,7 @@ func (r *Reader) work(index int) {
 		select {
 		case <-r.done:
 			return
+			// Job 应该来自于对于指定路径文件系统的监控, 发现需要监控的文件的时候,这里会产生新的job任务
 		case job := <-jobs:
 			if ctx, err := NewJobCollectContextAndValidate(job, readBuffer, backlogBuffer); err == nil {
 				processChain.Process(ctx)

@@ -32,6 +32,9 @@ func (bp *LoopProcessor) Code() string {
 	return "loop"
 }
 
+// Process
+//
+//	start->lastLine->loop->source->line->end
 func (bp *LoopProcessor) Process(processorChain file.ProcessChain, ctx *file.JobCollectContext) {
 	bp.startReadTime = time.Now()
 	bp.continueRead = 0

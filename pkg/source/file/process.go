@@ -9,6 +9,11 @@ import (
 	"github.com/loggie-io/loggie/pkg/core/log"
 )
 
+// JobCollectContext
+// 一次正常采集所需要的中间过程的信息？
+// 1.上一次采集的offset?
+// 2.ReadBuffer采集过程中未完成拼接的中间数据？
+// 3.BacklogBuffer?
 type JobCollectContext struct {
 	Job           *Job
 	Filename      string
@@ -21,6 +26,8 @@ type JobCollectContext struct {
 	IsEOF   bool
 }
 
+// NewJobCollectContextAndValidate
+// 核心逻辑在于，定位到文件的当前读取位置，这个文件是job已经打开的文件
 func NewJobCollectContextAndValidate(job *Job, readBuffer, backlogBuffer []byte) (*JobCollectContext, error) {
 	lastOffset, err := validateJob(job)
 	if err != nil {
@@ -35,6 +42,9 @@ func NewJobCollectContextAndValidate(job *Job, readBuffer, backlogBuffer []byte)
 	}, nil
 }
 
+// validateJob
+// 1.排除Job非法状态（job Stop）
+// 2.seek当前已打开文件的最新读取位置
 func validateJob(job *Job) (lastOffset int64, err error) {
 	filename := job.filename
 	status := job.status
@@ -111,6 +121,10 @@ func (sp *sortableProcessor) Processors() []Processor {
 	return sp.processors
 }
 
+// NewProcessChain
+// 串联多个Processor, 最终会以以下几个顺序进行调用:
+//
+//	start->lastLine->loop->source->line->end
 func NewProcessChain(config ReaderConfig) ProcessChain {
 	l := len(processFactories)
 	if l == 0 {
