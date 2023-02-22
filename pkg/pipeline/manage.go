@@ -46,6 +46,28 @@ func Register(category api.Category, typename api.Type, factory Factory) {
 	codeFactory[code] = factory
 }
 
+// GetWithType
+// code 值示例: interceptor/metric/
+// codeFactory 值示例如下，可知为工厂方法的集合
+//
+//	queue/channel/ => queue.makeQueue
+//	interceptor/addK8sMeta/ => interceptor/addk8smeta.makeInterceptor
+//	sink/file/ => sink/file.makeSink
+//	source/dev/ => source/dev.makeSource
+//
+// 方法返回值，以Interceptor举例：
+//
+//	返回Struct {
+//	  done chan struct[]
+//	  pipelineName string
+//	  name string
+//	  config *Config
+//	}
+//
+// 封装Intercept方法(sink.Invoker, sink.Invocation)
+//
+//	触发invoker.Invoke执行(invocation)
+//	上报Metric
 func GetWithType(category api.Category, typename api.Type, info Info) (api.Component, error) {
 	code := codeWithoutName(category, typename)
 	factory, ok := codeFactory[code]
@@ -60,6 +82,15 @@ func GetWithType(category api.Category, typename api.Type, info Info) (api.Compo
 	return component, nil
 }
 
+// RegisterCenter
+// RegisterCenter的注册后的Component的加载操作,其具体执行时机在于 Pipeline.start
+// 启动操作执行的时候.沿着:
+//
+//	pipeline.(*Pipeline).Start
+//	 => pipeline.(*Pipeline).StartSourceProduct
+//	 => pipeline.(*RegisterCenter).LoadSource
+//
+// 这样的路径往下执行.
 type RegisterCenter struct {
 	nameComponents    map[string]api.Component
 	interceptorsOrder []string

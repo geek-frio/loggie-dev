@@ -192,6 +192,11 @@ func (j *Job) cleanRename() {
 	j.renameTime.Store(NilOfTime)
 }
 
+// Active
+// Job置为Active状态
+// 1. file seek 到指定位置
+// 2. 计算设置当前所在的行数
+// 3. 打开文件，设置文件句柄引用
 func (j *Job) Active() (error, bool) {
 	fdOpen := false
 	if j.file == nil {
@@ -244,6 +249,8 @@ func (j *Job) NextOffset(offset int64) {
 	}
 }
 
+// GenerateIdentifier
+// 生成文件的md5sum(根据文件前n个字节)
 func (j *Job) GenerateIdentifier() error {
 	if j.identifier != "" {
 		return nil
@@ -306,6 +313,16 @@ func (j *Job) GetLineEnd() []byte {
 	return j.encodeLineEnd
 }
 
+// ProductEvent
+// 方法调用的时候已经读取到文件中的行数据
+// 进一步更新Job的状态
+// 属性列表:
+// 1.currentLineNumber 自增+1
+// 2.currentLines 自增+1
+// 3.endOffset是下一次读取开始的位移
+// 4.nextOffset是下一次读取开始的位移
+// 5.这一次读取内容开始的位移
+// 产生Job执行State的Meta,设置Event Meta的systemState的信息
 func (j *Job) ProductEvent(endOffset int64, collectTime time.Time, body []byte) {
 	nextOffset := endOffset + int64(len(j.GetEncodeLineEnd()))
 	contentBytes := int64(len(body))

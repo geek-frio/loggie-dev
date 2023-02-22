@@ -183,6 +183,7 @@ func (s *Source) Product() api.Event {
 func (s *Source) ProductLoop(productFunc api.ProductFunc) {
 	log.Info("%s start product loop", s.String())
 	s.productFunc = productFunc
+	// 增加额外的job fields
 	s.productFunc = jobFieldsProductFunc(s.productFunc, s.rawSourceConfig)
 	if s.config.CollectConfig.AddonMeta {
 		s.productFunc = addonMetaProductFunc(s.productFunc)

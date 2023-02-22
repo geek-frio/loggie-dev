@@ -60,15 +60,17 @@ var (
 )
 
 type Pipeline struct {
-	name          string
-	config        Config
-	done          chan struct{}
-	info          Info
-	r             *RegisterCenter
-	ns            map[string]api.Source // key:name|value:source
-	nq            map[string]api.Queue  // key:name|value:queue
-	flowPool      api.FlowDataPool
-	flowPoolDone  chan struct{}
+	name   string
+	config Config
+	done   chan struct{}
+	info   Info
+	// 注册Source
+	r            *RegisterCenter
+	ns           map[string]api.Source // key:name|value:source
+	nq           map[string]api.Queue  // key:name|value:queue
+	flowPool     api.FlowDataPool
+	flowPoolDone chan struct{}
+	// Golang 协程池管理
 	gpool         *ants.Pool
 	gpoolMaxSize  int
 	outChans      []chan api.Batch
@@ -915,6 +917,12 @@ func buildSinkInvokerChain(invoker sink.Invoker, interceptors []sink.Interceptor
 	return last
 }
 
+// startSource
+// 根据source.Config相关配置, 创建Source的Struct,补充完善关联的Codec等信息,
+// 以及配置的信息,并启动对应的Component.
+// 启动(startWithComponent)操作并不对应较为复杂的异步任务启动，而是对具体的接口Component的具体
+// 具体实现示例的Lifecycle方法的Init, Start的的调用.
+// 最终注册到Pipeline属性RegisterCenter之中.
 func (p *Pipeline) startSource(sourceConfigs []*source.Config) error {
 	for _, sourceConfig := range sourceConfigs {
 		if sourceConfig.Enabled != nil && *sourceConfig.Enabled == false {
@@ -927,13 +935,16 @@ func (p *Pipeline) startSource(sourceConfigs []*source.Config) error {
 		component, _ := GetWithType(ctx.Category(), ctx.Type(), p.info)
 
 		// get codec config
+		// code 的作用是json和regex,指代了两种日志的解析方式
 		codecConf := sourceConfig.Codec
+		// 假如这里是使用json的配置
 		if codecConf != nil {
 			// init codec
 			cod, ok := sourcecodec.Get(codecConf.Type)
 			if !ok {
 				return errors.Errorf("codec %s cannot be found", codecConf.Type)
 			}
+			// 这里获取到的是空的Json的Config
 			if conf, ok := cod.(api.Config); ok {
 				err := cfg.UnpackFromCommonCfg(codecConf.CommonCfg, conf.Config()).Defaults().Do()
 				if err != nil {

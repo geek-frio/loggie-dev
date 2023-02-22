@@ -45,6 +45,7 @@ type State struct {
 	Tags         string          `json:"tags,omitempty"`
 
 	// for cache
+	// watchJobId的值: pipelineName:sourceName:jobUid
 	watchUid string
 
 	// jobFields from job

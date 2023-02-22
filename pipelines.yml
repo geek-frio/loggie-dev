@@ -1,15 +1,56 @@
+# This is default test
+#pipelines:
+#  - name: local
+#    sources:
+#      - type: file
+#        name: demo
+#        paths:
+#          - /tmp/log/*.log
+#        fields:
+#          topic: "loggie"
+#    sink:
+#      type: dev
+#      codec:
+#        type: json
+#        printEvents: true
+#        pretty: true
+
+
+# This is for self debug use
+#pipelines:
+#  - name: local
+#    sources:
+#      - type: dev
+#        name: random_input
+#        qps: 2
+#        byteSize: 100
+#        eventsTotal: -1
+#    sink:
+#      type: dev
+#      parallelism: 1
+#      printEvents: true
+#      concurrency:
+#        enable: true
+#        rtt:
+#          blockJudgeThreshold: 120%
+#          newRttWeigh: 0.4
+#        goroutine:
+#          initThreshold: 8
+#          maxGoroutine: 20
+#          unstableTolerate: 3
+#          channelLenOfCap: 0.4
+
+# File source test
+
 pipelines:
   - name: local
     sources:
       - type: file
-        name: demo
+        name: test_append
         paths:
-          - /tmp/log/*.log
-        fields:
-          topic: "loggie"
+          - "/tmp/test_append.log"
     sink:
       type: dev
-      codec:
-        type: json
-        printEvents: true
-        pretty: true
+      parallelism: 1
+      printEvents: true
+

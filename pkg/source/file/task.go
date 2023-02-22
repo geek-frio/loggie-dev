@@ -42,19 +42,26 @@ type WatchTaskEvent struct {
 }
 
 type WatchTask struct {
-	epoch            *pipeline.Epoch
-	pipelineName     string
-	sourceName       string
-	config           CollectConfig
-	eventPool        *event.Pool
-	productFunc      api.ProductFunc
-	activeChan       chan *Job
-	countDown        *sync.WaitGroup
+	epoch        *pipeline.Epoch
+	pipelineName string
+	sourceName   string
+	config       CollectConfig
+	// 存放读取的file内容?
+	eventPool   *event.Pool
+	productFunc api.ProductFunc
+	activeChan  chan *Job
+	countDown   *sync.WaitGroup
+	// 一个task对应多个Job(name-> Job)?
 	waiteForStopJobs map[string]*Job
 	stopTime         time.Time
 	sourceFields     map[string]interface{}
 }
 
+// NewWatchTask
+//  1. WatchTask属性配置
+//     来自于哪个pipeline, sourceName等
+//  2. 所监控文件的设定
+//     排它的文件的正则设置
 func NewWatchTask(epoch *pipeline.Epoch, pipelineName string, sourceName string, config CollectConfig,
 	eventPool *event.Pool, productFunc api.ProductFunc, activeChan chan *Job, sourceFields map[string]interface{}) *WatchTask {
 	w := &WatchTask{
@@ -113,6 +120,9 @@ func (wt *WatchTask) WatchTaskKey() string {
 	return watchTaskKey.String()
 }
 
+// isParentOf
+//
+//	Jobs保姆
 func (wt *WatchTask) isParentOf(job *Job) bool {
 	return job.task.pipelineName == wt.pipelineName && job.task.sourceName == wt.sourceName
 }
