@@ -96,15 +96,18 @@ func (d *Dev) ProductLoop(productFunc api.ProductFunc) {
 	for {
 		select {
 		case <-d.stop:
+			log.Info("Stop is called!")
 			return
 
 		default:
 			header := make(map[string]interface{})
 			e := d.eventPool.Get()
 			e.Fill(e.Meta(), header, content)
+			log.Info("Start to call wait")
 			d.limiter.Wait(ctx)
+			log.Info("Call wait end")
 			productFunc(e)
-
+			log.Info("ProductFunc is end")
 			if total > 0 {
 				total--
 			} else if total == 0 {

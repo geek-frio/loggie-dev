@@ -42,15 +42,29 @@
 
 # File source test
 
+#pipelines:
+#  - name: local
+#    sources:
+#      - type: file
+#        name: test_append
+#        paths:
+#          - "/tmp/test_append.log"
+#    sink:
+#      type: dev
+#      parallelism: 1
+#      printEvents: true
+
 pipelines:
   - name: local
     sources:
-      - type: file
-        name: test_append
-        paths:
-          - "/tmp/test_append.log"
+      - type: dev
+        name: random_input
+        qps: 2
+        byteSize: 100
+        eventsTotal: -1
     sink:
       type: dev
-      parallelism: 1
-      printEvents: true
-
+      codec:
+        type: json
+        printEvents: true
+        pretty: true

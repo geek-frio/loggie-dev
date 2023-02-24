@@ -80,10 +80,11 @@ type Pipeline struct {
 	epoch         *Epoch
 	envMap        map[string]interface{}
 	pathMap       map[string]interface{}
-	outfunc       api.OutFunc
-	retryoutfunc  api.OutFunc
-	sinkinfo      sink.Info
-	concurrency   concurrency.Config
+	// 重要闭包,封装Sink相关invokerChain的instance
+	outfunc      api.OutFunc
+	retryoutfunc api.OutFunc
+	sinkinfo     sink.Info
+	concurrency  concurrency.Config
 
 	Running bool
 }
@@ -1001,6 +1002,7 @@ func (p *Pipeline) startSourceProduct(sourceConfigs []*source.Config) {
 		p.initFieldsFromPath(sc.FieldsFromPath)
 
 		sourceInvokerChain := buildSourceInvokerChain(sourceConfig.Name, &source.PublishInvoker{}, si.Interceptors)
+		// productFunc定义,闭包获取invokerChain和queue,处理event
 		productFunc := func(e api.Event) api.Result {
 			p.fillEventMetaAndHeader(e, *sourceConfig)
 
@@ -1008,7 +1010,7 @@ func (p *Pipeline) startSourceProduct(sourceConfigs []*source.Config) {
 				Event: e,
 				Queue: q,
 			})
-
+			log.Info("sourceInvokerChain.Invoke finished!")
 			if result.Status() == api.DROP {
 				p.info.EventPool.Put(e)
 			}

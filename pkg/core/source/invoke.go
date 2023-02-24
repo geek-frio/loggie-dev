@@ -18,6 +18,7 @@ package source
 
 import (
 	"github.com/loggie-io/loggie/pkg/core/api"
+	"github.com/loggie-io/loggie/pkg/core/log"
 	"github.com/loggie-io/loggie/pkg/core/result"
 )
 
@@ -52,6 +53,8 @@ type PublishInvoker struct {
 }
 
 func (i *PublishInvoker) Invoke(invocation Invocation) api.Result {
+	log.Info("New Invocation is comming!")
 	invocation.Queue.In(invocation.Event)
+	log.Info("In queue is Ok!")
 	return result.Success()
 }

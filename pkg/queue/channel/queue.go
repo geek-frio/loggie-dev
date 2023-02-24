@@ -118,6 +118,7 @@ func (c *Queue) worker() {
 	flush := func() {
 		c.beforeQueueConvertBatch(buffer)
 		c.out <- batch.NewBatchWithEvents(buffer)
+		log.Info("c.out length is:%d", len(c.out))
 		buffer = make([]api.Event, 0, batchSize)
 		size = 0
 		bytes = 0
@@ -133,6 +134,7 @@ func (c *Queue) worker() {
 			})
 			return
 		case e := <-c.in:
+			log.Info("New Event is comming!!")
 			if size == 0 {
 				firstEventAppendTime = time.Now()
 			}
@@ -166,7 +168,9 @@ func (c *Queue) Stop() {
 }
 
 func (c *Queue) In(event api.Event) {
+	log.Info("c.In's length is %d", len(c.in))
 	c.in <- event
+	log.Info("c.In's success!")
 }
 
 func (c *Queue) Out() api.Batch {
